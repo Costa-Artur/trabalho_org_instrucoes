@@ -1,0 +1,15 @@
+C:\Users\7828497\Desktop\trabalho_instrucoes\bin\Debug\net7.0\trabalho_instrucoes.exe
+C:\Users\7828497\Desktop\trabalho_instrucoes\bin\Debug\net7.0\trabalho_instrucoes.deps.json
+C:\Users\7828497\Desktop\trabalho_instrucoes\bin\Debug\net7.0\trabalho_instrucoes.runtimeconfig.json
+C:\Users\7828497\Desktop\trabalho_instrucoes\bin\Debug\net7.0\trabalho_instrucoes.dll
+C:\Users\7828497\Desktop\trabalho_instrucoes\bin\Debug\net7.0\trabalho_instrucoes.pdb
+C:\Users\7828497\Desktop\trabalho_instrucoes\obj\Debug\net7.0\trabalho_instrucoes.csproj.AssemblyReference.cache
+C:\Users\7828497\Desktop\trabalho_instrucoes\obj\Debug\net7.0\trabalho_instrucoes.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\7828497\Desktop\trabalho_instrucoes\obj\Debug\net7.0\trabalho_instrucoes.AssemblyInfoInputs.cache
+C:\Users\7828497\Desktop\trabalho_instrucoes\obj\Debug\net7.0\trabalho_instrucoes.AssemblyInfo.cs
+C:\Users\7828497\Desktop\trabalho_instrucoes\obj\Debug\net7.0\trabalho_instrucoes.csproj.CoreCompileInputs.cache
+C:\Users\7828497\Desktop\trabalho_instrucoes\obj\Debug\net7.0\trabalho_instrucoes.dll
+C:\Users\7828497\Desktop\trabalho_instrucoes\obj\Debug\net7.0\refint\trabalho_instrucoes.dll
+C:\Users\7828497\Desktop\trabalho_instrucoes\obj\Debug\net7.0\trabalho_instrucoes.pdb
+C:\Users\7828497\Desktop\trabalho_instrucoes\obj\Debug\net7.0\trabalho_instrucoes.genruntimeconfig.cache
+C:\Users\7828497\Desktop\trabalho_instrucoes\obj\Debug\net7.0\ref\trabalho_instrucoes.dll
