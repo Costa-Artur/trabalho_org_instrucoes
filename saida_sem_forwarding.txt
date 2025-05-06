@@ -1,0 +1,45 @@
+Instrução: Tipo U | rd: s6, rs1: sp, rs2: t3
+
+Instrução: Tipo I | rd: s6, rs1: s6, rs2: x0
+Conflito de dados: registrador s6 usado nas próximas duas instruções.
+Stall necessário (sem forwarding).
+
+Instrução: Tipo I | rd: s5, rs1: x0, rs2: gp
+
+Instrução: Tipo I | rd: s4, rs1: x0, rs2: ra
+
+Instrução: Tipo I | rd: s3, rs1: x0, rs2: x0
+
+Instrução: Tipo R | rd: t1, rs1: s3, rs2: s3
+Conflito de dados: registrador s3 usado nas próximas duas instruções.
+Stall necessário (sem forwarding).
+
+Instrução: Tipo R | rd: t1, rs1: t1, rs2: t1
+Conflito de dados: registrador t1 usado nas próximas duas instruções.
+Stall necessário (sem forwarding).
+
+Instrução: Tipo R | rd: t1, rs1: t1, rs2: s6
+Conflito de dados: registrador t1 usado nas próximas duas instruções.
+Stall necessário (sem forwarding).
+
+Instrução: Tipo I | rd: t0, rs1: t1, rs2: x0
+Conflito de dados: registrador t1 usado nas próximas duas instruções.
+Stall necessário (sem forwarding).
+
+Instrução: Tipo B | rd: a2, rs1: t0, rs2: s5
+Conflito de controle detectado.
+Stall de 1 ciclo necessário.
+Conflito de dados: registrador t0 usado nas próximas duas instruções.
+Stall necessário (sem forwarding).
+
+Instrução: Tipo R | rd: s3, rs1: s3, rs2: s4
+
+Instrução: Tipo J | rd: x0, rs1: t6, rs2: s1
+Conflito de controle detectado.
+Stall de 1 ciclo necessário.
+
+Instrução: Tipo I | rd: x0, rs1: x0, rs2: x0
+Conflito de dados: registrador x0 usado nas próximas duas instruções.
+Stall necessário (sem forwarding).
+
+Total de stalls: 9
