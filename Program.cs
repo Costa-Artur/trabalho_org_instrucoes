@@ -1,18 +1,16 @@
 ﻿
 internal class Program
 {
-    private static void Main(string[] args)
+     private static void Main(string[] args)
     {
         string arquivoEntrada = "teste.txt";
-        string saidaSemForwarding = "saida_sem_forwarding.txt";
-        string saidaComForwarding = "saida_com_forwarding.txt";
 
-        Console.WriteLine("Simulando sem forwarding...");
-        PipelineSimulator.ProcessarInstrucoes(arquivoEntrada, saidaSemForwarding, false);
+        PipelineSimulator.ProcessarInstrucoes(arquivoEntrada, "saida_sem_forwarding.txt", forwarding: false, incluirNops: false);
+        PipelineSimulator.ProcessarInstrucoes(arquivoEntrada, "saida_com_forwarding.txt", forwarding: true, incluirNops: false);
+        PipelineSimulator.ProcessarInstrucoes(arquivoEntrada, "saida_sem_forwarding_com_nops.txt", forwarding: false, incluirNops: true);
+        PipelineSimulator.ProcessarInstrucoes(arquivoEntrada, "saida_com_forwarding_com_nops.txt", forwarding: true, incluirNops: true);
+        PipelineSimulator.GerarArquivosReordenados("teste.txt");
 
-        Console.WriteLine("Simulando com forwarding...");
-        PipelineSimulator.ProcessarInstrucoes(arquivoEntrada, saidaComForwarding, true);
-
-        Console.WriteLine("Simulação finalizada. Verifique os arquivos de saída.");
+        Console.WriteLine("Simulações finalizadas. Verifique os arquivos de saída.");
     }
 }
