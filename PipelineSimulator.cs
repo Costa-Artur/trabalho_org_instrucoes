@@ -149,51 +149,9 @@ public class PipelineSimulator
 
     public static void GerarArquivosReordenados(string entrada)
     {
-        var linhas = File.ReadAllLines(entrada).ToList();
-
-        // Simples algoritmo de reordenação para evitar dependências imediatas (exemplo educativo)
-        List<string> ReordenarInstrucoes(List<string> instrucoes, bool forwarding)
-        {
-            List<string> resultado = new();
-            Queue<string> espera = new();
-            string ultimoRD = "";
-
-            foreach (var instr in instrucoes)
-            {
-                string bin = string.Join("", instr.Select(c => hexCharacterToBinary[char.ToLower(c)]));
-                if (bin.Length < 32)
-                {
-                    resultado.Add(instr);
-                    continue;
-                }
-
-                string rd = bin.Substring(20, 5);
-                string rs1 = bin.Substring(12, 5);
-                string rs2 = bin.Substring(7, 5);
-
-                if ((!forwarding && (rs1 == ultimoRD || rs2 == ultimoRD)) ||
-                    (forwarding && (rs1 == ultimoRD || rs2 == ultimoRD && bin.Substring(25, 7) == "0110011")))
-                {
-                    espera.Enqueue(instr);
-                    resultado.Add(NOP_HEX);
-                }
-                else
-                {
-                    resultado.Add(instr);
-                    ultimoRD = rd;
-                }
-            }
-
-            while (espera.Count > 0)
-                resultado.Add(espera.Dequeue());
-
-            return resultado;
-        }
-        
         ReordenarInstrucoesParaReducaoDeStallsComForwarding(entrada, "saida_com_forwarding_reordenado.txt");
         
         ReordenarInstrucoesParaReducaoDeStallsComForwarding(entrada, "saida_sem_forwarding_reordenado.txt");
-
     }
     
     public static void ReordenarInstrucoesParaReducaoDeStallsComForwarding(string entrada, string saida)
@@ -216,7 +174,6 @@ public class PipelineSimulator
         string opcodeAtual = atualBin.Substring(25, 7);
         string rdAtual = atualBin.Substring(20, 5);
 
-        // Detectar se é uma instrução de load
         bool ehLoad = opcodeAtual == "0000011"; // opcode de LOAD
 
         if (ehLoad && i + 1 < instrucoes.Count)
@@ -233,10 +190,8 @@ public class PipelineSimulator
             string rs1Prox = proximaBin.Substring(12, 5);
             string rs2Prox = proximaBin.Substring(7, 5);
 
-            // Se a próxima usa o resultado do load
             if (rs1Prox == rdAtual || rs2Prox == rdAtual)
             {
-                // Procurar uma instrução posterior independente
                 bool encontrada = false;
                 for (int j = i + 2; j < instrucoes.Count; j++)
                 {
@@ -250,7 +205,6 @@ public class PipelineSimulator
 
                     if (rs1Cand != rdAtual && rs2Cand != rdAtual && rdCand != rdAtual)
                     {
-                        // Mover a candidata para logo após a load
                         resultado.Add(atual);
                         resultado.Add(candidata);
                         instrucoes.RemoveAt(j);
@@ -277,4 +231,31 @@ public class PipelineSimulator
 
     File.WriteAllLines(saida, resultado);
 }
+    
+    public static void InserirNopsParaDesvios(string entrada, string saida)
+    {
+        var instrucoes = File.ReadAllLines(entrada).ToList();
+        List<string> resultado = new();
+
+        foreach (var instr in instrucoes)
+        {
+            string binario = string.Join("", instr.Select(c => hexCharacterToBinary[char.ToLower(c)]));
+            if (binario.Length < 32)
+            {
+                resultado.Add(instr);
+                continue;
+            }
+
+            string opcode = binario.Substring(25, 7);
+
+            resultado.Add(instr);
+
+            if (opcode == "1100011")
+            {
+                resultado.Add("00000013");
+            }
+        }
+
+        File.WriteAllLines(saida, resultado);
+    }
 }
