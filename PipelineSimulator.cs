@@ -29,123 +29,122 @@ public class PipelineSimulator
 
     const string NOP_HEX = "00000013";
 
-    public static void ProcessarInstrucoes(string arquivoEntrada, string arquivoSaida, bool forwarding, bool incluirNops)
+public static void ProcessarInstrucoes(string arquivoEntrada, string arquivoSaida, bool forwarding, bool incluirNops)
+{
+    Queue<int> ultimosRD = new();
+    int stalls = 0;
+    string tipoInstrucaoAnterior = "";
+    int rdAnterior = -1;
+    int numNops = 0;
+
+    List<string> instrucoesComNopsHex = new();
+
+    using StreamWriter writer = new(arquivoSaida);
+    foreach (string linha in File.ReadLines(arquivoEntrada))
     {
-        Queue<int> ultimosRD = new();
-        int stalls = 0;
-        string tipoInstrucaoAnterior = "";
-        int rdAnterior = -1;
-
-        List<string> instrucoesComNopsHex = new();
-
-        using StreamWriter writer = new(arquivoSaida);
-        foreach (string linha in File.ReadLines(arquivoEntrada))
+        string binarioCombinado = "";
+        foreach (char c in linha)
         {
-            string binarioCombinado = "";
-            foreach (char c in linha)
+            if (hexCharacterToBinary.TryGetValue(char.ToLower(c), out string? valor))
             {
-                if (hexCharacterToBinary.TryGetValue(char.ToLower(c), out string? valor))
-                {
-                    binarioCombinado += valor;
-                }
+                binarioCombinado += valor;
             }
+        }
 
-            if (binarioCombinado.Length < 32)
-            {
-                if (!incluirNops)
-                    writer.WriteLine("Instrução incompleta.");
-                continue;
-            }
-
-            string opcode = binarioCombinado.Substring(25, 7);
-            string tipoInstrucao = instructionDictionary.ContainsKey(opcode) ? instructionDictionary[opcode] : "desconhecido";
-
-            string rdBin = binarioCombinado.Substring(20, 5);
-            string rs1Bin = binarioCombinado.Substring(12, 5);
-            string rs2Bin = binarioCombinado.Substring(7, 5);
-
-            int rd = Convert.ToInt32(rdBin, 2);
-            int rs1 = Convert.ToInt32(rs1Bin, 2);
-            int rs2 = Convert.ToInt32(rs2Bin, 2);
-
-            string nomeRd = nomeRegistradores.ContainsKey(rd) ? nomeRegistradores[rd] : $"x{rd}";
-            string nomeRs1 = nomeRegistradores.ContainsKey(rs1) ? nomeRegistradores[rs1] : $"x{rs1}";
-            string nomeRs2 = nomeRegistradores.ContainsKey(rs2) ? nomeRegistradores[rs2] : $"x{rs2}";
-
+        if (binarioCombinado.Length < 32)
+        {
             if (!incluirNops)
-            {
-                writer.WriteLine($"Instrução: Tipo {tipoInstrucao} | rd: {nomeRd}, rs1: {nomeRs1}, rs2: {nomeRs2}");
-            }
+                writer.WriteLine("Instrução incompleta.");
+            continue;
+        }
 
-            bool precisaStall = false;
-            if (!forwarding)
+        string opcode = binarioCombinado.Substring(25, 7);
+        string tipoInstrucao = instructionDictionary.ContainsKey(opcode) ? instructionDictionary[opcode] : "desconhecido";
+
+        string rdBin = binarioCombinado.Substring(20, 5);
+        string rs1Bin = binarioCombinado.Substring(12, 5);
+        string rs2Bin = binarioCombinado.Substring(7, 5);
+
+        int rd = Convert.ToInt32(rdBin, 2);
+        int rs1 = Convert.ToInt32(rs1Bin, 2);
+        int rs2 = Convert.ToInt32(rs2Bin, 2);
+
+        string nomeRd = nomeRegistradores.ContainsKey(rd) ? nomeRegistradores[rd] : $"x{rd}";
+        string nomeRs1 = nomeRegistradores.ContainsKey(rs1) ? nomeRegistradores[rs1] : $"x{rs1}";
+        string nomeRs2 = nomeRegistradores.ContainsKey(rs2) ? nomeRegistradores[rs2] : $"x{rs2}";
+
+        bool precisaStall = false;
+
+        if (!forwarding)
+        {
+            foreach (int regAnterior in ultimosRD)
             {
-                foreach (int regAnterior in ultimosRD)
+                if (rs1 == regAnterior || rs2 == regAnterior)
                 {
-                    if (rs1 == regAnterior || rs2 == regAnterior)
-                    {
-                        if (!incluirNops)
-                        {
-                            string nomeRegAnterior = nomeRegistradores.ContainsKey(regAnterior) ? nomeRegistradores[regAnterior] : $"x{regAnterior}";
-                            writer.WriteLine($"Conflito de dados: registrador {nomeRegAnterior} usado nas próximas duas instruções.");
-                        }
-                        precisaStall = true;
-                        stalls++;
-                        break;
-                    }
+                    precisaStall = true;
+                    stalls++;
+                    break;
                 }
             }
-            else
+        }
+        else
+        {
+            if (tipoInstrucaoAnterior == "I" && opcode == "0110011")
             {
-                if (tipoInstrucaoAnterior == "I" && opcode == "0110011")
+                if (rs1 == rdAnterior || rs2 == rdAnterior)
                 {
-                    if (rs1 == rdAnterior || rs2 == rdAnterior)
-                    {
-                        if (!incluirNops)
-                        {
-                            string nomeRegAnterior = nomeRegistradores.ContainsKey(rdAnterior) ? nomeRegistradores[rdAnterior] : $"x{rdAnterior}";
-                            writer.WriteLine($"Conflito de dados com load: registrador {nomeRegAnterior} usado logo após.");
-                        }
-                        precisaStall = true;
-                        stalls++;
-                    }
+                    precisaStall = true;
+                    stalls++;
                 }
-            }
-
-            if (incluirNops)
-            {
-                if (precisaStall)
-                {
-                    instrucoesComNopsHex.Add(NOP_HEX);
-                }
-                instrucoesComNopsHex.Add(linha.Trim().ToLower());
-            }
-            else
-            {
-                ultimosRD.Enqueue(rd);
-                if (ultimosRD.Count > 2)
-                    ultimosRD.Dequeue();
-
-                tipoInstrucaoAnterior = tipoInstrucao;
-                rdAnterior = rd;
-
-                writer.WriteLine();
             }
         }
 
         if (incluirNops)
         {
-            foreach (var instr in instrucoesComNopsHex)
+            if (precisaStall)
             {
-                writer.WriteLine(instr);
+                instrucoesComNopsHex.Add(NOP_HEX);
+                numNops++;
             }
+
+            instrucoesComNopsHex.Add(linha.Trim().ToLower()); 
         }
         else
         {
-            writer.WriteLine($"Total de stalls: {stalls}");
-            Console.WriteLine($"{(forwarding ? "[COM FORWARDING]" : "[SEM FORWARDING]")} Total de stalls: {stalls}");
+            writer.WriteLine($"Instrução: Tipo {tipoInstrucao} | rd: {nomeRd}, rs1: {nomeRs1}, rs2: {nomeRs2}");
+
+            if (precisaStall)
+            {
+                string nomeRegConflito = nomeRegistradores.ContainsKey(rdAnterior) ? nomeRegistradores[rdAnterior] : $"x{rdAnterior}";
+                writer.WriteLine($"Conflito de dados: registrador {nomeRegConflito} usado logo após.");
+            }
+
+            writer.WriteLine();
         }
+
+        ultimosRD.Enqueue(rd);
+        if (ultimosRD.Count > 2)
+            ultimosRD.Dequeue();
+
+        tipoInstrucaoAnterior = tipoInstrucao;
+        rdAnterior = rd;
     }
+
+    if (incluirNops)
+    {
+        foreach (var instr in instrucoesComNopsHex)
+        {
+            writer.WriteLine(instr);
+        }
+        writer.WriteLine($"Total de NOPS: {numNops}");
+        Console.WriteLine($"{(forwarding ? "[COM FORWARDING]" : "[SEM FORWARDING]")} Total de NOPS: {numNops}");
+    }
+    else
+    {
+        writer.WriteLine($"Total de stalls: {stalls}");
+        Console.WriteLine($"{(forwarding ? "[COM FORWARDING]" : "[SEM FORWARDING]")} Total de stalls: {stalls}");
+    }
+}
 
     public static void GerarArquivosReordenados(string entrada)
     {
@@ -257,5 +256,67 @@ public class PipelineSimulator
         }
 
         File.WriteAllLines(saida, resultado);
+        
+        int nopsInseridos = resultado.Count(x => x == NOP_HEX);
+        Console.WriteLine($"[DESVIO SIMPLES] NOPs inseridos após desvios: {nopsInseridos}");
     }
+    
+    public static void InserirInstrucaoUtilOuNopAposDesvio(string entrada, string saida)
+{
+    var instrucoes = File.ReadAllLines(entrada).ToList();
+    List<string> resultado = new();
+
+    int i = 0;
+    while (i < instrucoes.Count)
+    {
+        string instrAtual = instrucoes[i];
+        string binAtual = string.Join("", instrAtual.Select(c => hexCharacterToBinary[char.ToLower(c)]));
+
+        if (binAtual.Length < 32)
+        {
+            resultado.Add(instrAtual);
+            i++;
+            continue;
+        }
+
+        string opcodeAtual = binAtual.Substring(25, 7);
+        resultado.Add(instrAtual);
+
+        if (opcodeAtual == "1100011")
+        {
+            if (i + 1 < instrucoes.Count)
+            {
+                string proximaInstr = instrucoes[i + 1];
+                string binProx = string.Join("", proximaInstr.Select(c => hexCharacterToBinary[char.ToLower(c)]));
+                if (binProx.Length >= 32)
+                {
+                    string rs1Desvio = binAtual.Substring(12, 5);
+                    string rs2Desvio = binAtual.Substring(7, 5);
+
+                    string rs1Prox = binProx.Substring(12, 5);
+                    string rs2Prox = binProx.Substring(7, 5);
+                    string rdProx  = binProx.Substring(20, 5);
+
+                    if (rdProx != rs1Desvio && rdProx != rs2Desvio &&
+                        rs1Prox != rs1Desvio && rs1Prox != rs2Desvio &&
+                        rs2Prox != rs1Desvio && rs2Prox != rs2Desvio)
+                    {
+                        resultado.Add(proximaInstr);
+                        i += 2;
+                        continue;
+                    }
+                }
+            }
+
+            resultado.Add("00000013");
+        }
+
+        i++;
+    }
+
+    File.WriteAllLines(saida, resultado);
+    int nopsInseridos = resultado.Count(x => x == NOP_HEX);
+    Console.WriteLine($"[DELAYED BRANCH] NOPs inseridos: {nopsInseridos}");
+}
+
 }

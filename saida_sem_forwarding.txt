@@ -1,0 +1,27 @@
+Instrução: Tipo J | rd: x0, rs1: x0, rs2: s0
+
+Instrução: Tipo R | rd: t3, rs1: t4, rs2: t5
+
+Instrução: Tipo R | rd: t0, rs1: t1, rs2: t2
+
+Instrução: Tipo I | rd: s0, rs1: t0, rs2: x0
+Conflito de dados: registrador t0 usado logo após.
+
+Instrução: Tipo R | rd: t0, rs1: s0, rs2: s0
+Conflito de dados: registrador s0 usado logo após.
+
+Instrução: Tipo B | rd: a7, rs1: t3, rs2: t0
+Conflito de dados: registrador t0 usado logo após.
+
+Instrução: Tipo R | rd: t4, rs1: t5, rs2: t0
+Conflito de dados: registrador a7 usado logo após.
+
+Instrução: Tipo I | rd: s1, rs1: s2, rs2: x0
+
+Instrução: Tipo I | rd: s3, rs1: s4, rs2: tp
+
+Instrução: Tipo desconhecido | rd: ra, rs1: ra, rs2: x0
+
+Instrução: Tipo J | rd: ra, rs1: t6, rs2: t4
+
+Total de stalls: 4
